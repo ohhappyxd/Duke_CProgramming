@@ -1,0 +1,26 @@
+aaabb bbbcc
+abcde abcde
+12345 11234
+!!@@3 !@#$%
+11111 22222
+123aa 123bb
+111ab 222cd
+aaaaa bbbbb
+aaaab cccdd
+aaabb ccccd
+!!!@@ !!@@@
+=====
+____= ____+
+
+::123 22345
+rrsst rrrss
+wwwxx wwwww
+abcd abcde
+abcde abcdef
+abc d abcde
+ABCD! ABCDE
+\n\n\n\n\n aaaaa
+aabb ccdd
+abcdee bcdeff
+aaabb aaab
+
