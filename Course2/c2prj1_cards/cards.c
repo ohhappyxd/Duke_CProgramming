@@ -11,16 +11,16 @@ void assert_card_valid(card_t c) {
 
 const char * ranking_to_string(hand_ranking_t r) {
   switch (r) {
-  case STRAIGHT_FLUSH: return "STRAIGHT FLUSH";
-  case FOUR_OF_A_KIND: return "FOUR OF A KIND";
-  case FULL_HOUSE: return "FULL HOUSE";
+  case STRAIGHT_FLUSH: return "STRAIGHT_FLUSH";
+  case FOUR_OF_A_KIND: return "FOUR_OF_A_KIND";
+  case FULL_HOUSE: return "FULL_HOUSE";
   case FLUSH: return "FLUSH";
   case STRAIGHT: return "STRAIGHT";
-  case THREE_OF_A_KIND: return "THREE OF A KIND";
-  case TWO_PAIR: return "TWO PAIR";
+  case THREE_OF_A_KIND: return "THREE_OF_A_KIND";
+  case TWO_PAIR: return "TWO_PAIR";
   case PAIR: return "PAIR";
   case NOTHING: return "NOTHING";
-  default: return "UNKNOWN RANKING";
+  default: return "UNKNOWN_RANKING";
     }
 }
 
@@ -32,11 +32,11 @@ char value_letter(card_t c) {
     return v + 38;
   } else {
     switch (v) {
-    case 11: return "J";
-    case 12: return "Q";
-    case 13: return "K";
-    case 14: return "A";
-    default: return "U";
+    case VALUE_JACK: return 'J';
+    case VALUE_QUEEN: return 'Q';
+    case VALUE_KING: return 'K';
+    case VALUE_ACE: return 'A';
+    default: return 'U';
     }
   }
 }
@@ -45,10 +45,12 @@ char value_letter(card_t c) {
 char suit_letter(card_t c) {
   suit_t s = c.suit;
   switch (s) {
-  case SPADES: return "s";
-  case HEARTS: return "h";
-  case DIAMONDS: return "d";
-  case CLUBS: return "c";
+  case SPADES: return 's';
+  case HEARTS: return 'h';
+  case DIAMONDS: return 'd';
+  case CLUBS: return 'c';
+  case NUM_SUITS: return 'u';
+  default: return '?';
     }
 }
 
@@ -60,25 +62,25 @@ void print_card(card_t c) {
 
 card_t card_from_letters(char value_let, char suit_let) {
   unsigned value;
-  if (value_let == "0") {
+  if (value_let == '0') {
     value = 10;
   } else if (value_let >= 50 && value_let <= 57) {
-    value = value_let - "0";
+    value = value_let - '0';
   } else {
     switch (value_let) {
-    case "J": value = 11; break;
-    case "Q": value = 12; break;
-    case "K": value = 13; break;
-    case "A": value = 14; break;
+    case 'J': value = VALUE_JACK; break;
+    case 'Q': value = VALUE_QUEEN; break;
+    case 'K': value = VALUE_KING; break;
+    case 'A': value = VALUE_ACE; break;
     default: printf("Invalide value"); exit(EXIT_FAILURE);
     }
   }
   suit_t suit;
   switch (suit_let) {
-  case "s": suit = SPADE;
-  case "h": suit = HEARTS;
-  case "d": suit = DIAMONDS;
-  case "c": suit = CLUBS;
+  case 's': suit = SPADES; break;
+  case 'h': suit = HEARTS; break;
+  case 'd': suit = DIAMONDS; break;
+  case 'c': suit = CLUBS; break;
   default: printf("Invalide suit."); exit(EXIT_FAILURE);
   }
   card_t temp;
@@ -90,6 +92,9 @@ card_t card_from_letters(char value_let, char suit_let) {
 
 card_t card_from_num(unsigned c) {
   assert(c < 52);
+  // 0-12 for spades, 13-25 for hearts, 26-38 for diamonts, 39-51 for clubs.  
   card_t temp;
+  temp.suit = (suit_t)(c / 13);
+  temp.value = c % 13 + 2;
   return temp;
 }
