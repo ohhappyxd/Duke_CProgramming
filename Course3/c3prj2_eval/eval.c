@@ -6,10 +6,18 @@
 int card_ptr_comp(const void * vp1, const void * vp2) {
   const card_t * const * card1 = (const card_t * const *)vp1;
   const card_t * const * card2 = (const card_t * const *)vp2;
-  if ((*card1)->value == (*card2)->value) {
-    return (*card2)->suit - (*card1)->suit;
+  if ((*card1)->value - (*card2)->value < 0) {
+    return 1;
+  } else if ((*card1)->value - (*card2)->value > 0) {
+    return -1;
   } else {
-    return (*card1)->value - (*card2)->value;
+    if ((*card1)->suit - (*card2)->suit < 0) {
+      return -1;
+    } else if ((*card1)->suit - (*card2)->suit > 0) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -21,7 +29,7 @@ suit_t flush_suit(deck_t * hand) {
     counts[card->suit]++;
   }
   for (int i = 0; i < NUM_SUITS; i++) {
-    if (counts[i] > 5) return (suit_t)i;
+    if (counts[i] >= 5) return (suit_t)i;
   }
   return NUM_SUITS;
 }
@@ -65,8 +73,8 @@ int is_n_length_straight_at(deck_t * hand, size_t index, suit_t fs, int n) {
   }
   int count = 1;
   for (size_t i = index; i + 1 < hand->n_cards && count < n; i++) {
-    unsigned curr_value = hand->cards[index]->value;
-    unsigned next_value = hand->cards[index+1]->value;
+    unsigned curr_value = hand->cards[i]->value;
+    unsigned next_value = hand->cards[i+1]->value;
     
     if (next_value == curr_value) {
       continue;
@@ -106,6 +114,9 @@ hand_eval_t build_hand_from_match(deck_t * hand,
 
   hand_eval_t ans;
   ans.ranking = what;
+  for (int i = 0; i < 5; i++) {
+    ans.cards[i] = NULL;
+  }
   for (size_t i = 0; i < n; i++) {
     ans.cards[i] = hand->cards[idx + i];
   }
@@ -120,7 +131,16 @@ hand_eval_t build_hand_from_match(deck_t * hand,
 
 
 int compare_hands(deck_t * hand1, deck_t * hand2) {
-
+  qsort(hand1->cards, hand1->n_cards, sizeof(card_t *), card_ptr_comp);
+  qsort(hand2->cards, hand2->n_cards, sizeof(card_t *), card_ptr_comp);
+  hand_eval_t hand1Eval = evaluate_hand(hand1);
+  hand_eval_t hand2Eval = evaluate_hand(hand2);
+  if (hand1Eval.ranking < hand2Eval.ranking) return 1;
+  if (hand1Eval.ranking > hand2Eval.ranking) return -1;
+  for (unsigned i = 0; i < 5; i++) {
+    if (hand1Eval.cards[i]->value > hand2Eval.cards[i]->value) return 1;
+    if (hand1Eval.cards[i]->value < hand2Eval.cards[i]->value) return -1;
+    }
   return 0;
 }
 

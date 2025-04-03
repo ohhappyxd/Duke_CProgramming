@@ -3,14 +3,8 @@
 #include <assert.h>
 #include "deck.h"
 void print_hand(deck_t * hand){
-  if (hand == NULL || hand->cards == NULL) {
-    return;
-  }
   size_t n = hand->n_cards;
   for (size_t i = 0; i < n; i++) {
-    if (hand->cards[i] == NULL) {
-      continue;
-    }
     card_t * card = hand->cards[i];
     print_card(*card);
     printf(" ");
