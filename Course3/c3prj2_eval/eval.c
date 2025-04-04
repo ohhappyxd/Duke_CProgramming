@@ -6,19 +6,11 @@
 int card_ptr_comp(const void * vp1, const void * vp2) {
   const card_t * const * card1 = (const card_t * const *)vp1;
   const card_t * const * card2 = (const card_t * const *)vp2;
-  if ((*card1)->value - (*card2)->value < 0) {
-    return 1;
-  } else if ((*card1)->value - (*card2)->value > 0) {
-    return -1;
+  if ((*card1)->value != (*card2)->value) {
+    return (*card2)->value - (*card1)->value;
   } else {
-    if ((*card1)->suit - (*card2)->suit < 0) {
-      return -1;
-    } else if ((*card1)->suit - (*card2)->suit > 0) {
-      return 1;
-    } else {
-      return 0;
+    return (*card2)->suit - (*card1)->suit;
     }
-  }
 }
 
 suit_t flush_suit(deck_t * hand) {
@@ -72,17 +64,16 @@ int is_n_length_straight_at(deck_t * hand, size_t index, suit_t fs, int n) {
       return 0;
   }
   int count = 1;
-  for (size_t i = index; i + 1 < hand->n_cards && count < n; i++) {
+  unsigned next_value = hand->cards[index]->value - 1;
+  for (size_t i = index + 1; i < hand->n_cards && count < n; i++) {
     unsigned curr_value = hand->cards[i]->value;
-    unsigned next_value = hand->cards[i+1]->value;
-    
-    if (next_value == curr_value) {
+        
+    if (curr_value != next_value) {
       continue;
     }
-    if (next_value == curr_value - 1 && (fs == NUM_SUITS || hand->cards[i+1]->suit == fs)) {
+    if (fs == NUM_SUITS || hand->cards[i]->suit == fs) {
       count++;
-    } else {
-      break;
+      next_value--;
     }
   }
   return (count == n) ? 1 : 0;
@@ -122,7 +113,7 @@ hand_eval_t build_hand_from_match(deck_t * hand,
   }
   size_t nextIndex = n;
   for (size_t i = 0; i < hand->n_cards && nextIndex < 5; i++) {
-    if (i < idx || i > idx + n - 1){
+    if (n == 0 || i < idx || i > idx + n - 1){
       ans.cards[nextIndex++] = hand->cards[i];
     }
   }
