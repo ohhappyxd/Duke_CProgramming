@@ -7,7 +7,7 @@ void add_future_card(future_cards_t * fc, size_t index, card_t * ptr) {
   if (fc == NULL) {
     return;
   }
-  if (index > fc->n_decks) {
+  if (index >= fc->n_decks) {
     size_t old_n_decks = fc->n_decks;
     size_t new_n_decks = index + 1;
     deck_t * new_decks = realloc(fc->decks, new_n_decks * sizeof(*fc->decks));
