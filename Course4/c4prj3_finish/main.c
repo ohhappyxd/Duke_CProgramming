@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include "cards.h"
 #include "deck.h"
 #include "eval.h"
@@ -18,7 +19,7 @@ int main(int argc, char ** argv) {
   }
 
   long num_trials = DEFAULT_TRIALS;
-  if (argc = 3) {
+  if (argc == 3) {
     char *endptr = NULL;
     errno = 0;
     num_trials = strtol(argv[2], &endptr, 10);
@@ -36,7 +37,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
   size_t n_hands = 0;
-  future_card_t fc;
+  future_cards_t fc;
   fc.n_decks = 0;
   fc.decks = NULL;
   deck_t **hands = read_input(f, &n_hands, &fc);
@@ -46,28 +47,48 @@ int main(int argc, char ** argv) {
   // Create an array to count how many times each hand wins, with
   // one more element for ties.
   int *results = calloc(n_hands + 1, sizeof(*results));
+  
+  // Do Monte Carlo trial for num_trials times
+  // For each trial, shuffle remaining deck, assign unknown cards from
+  // remaining deck, then compare hands and count the results
+  for (long i = 0; i < num_trials; i++) {
+    shuffle(remaining_deck);
+    future_cards_from_deck(remaining_deck, &fc);
 
+    size_t winning_hand = 0;
+    int tie = 0;
+    for (size_t j = 1; j < n_hands; j++) {
+      int cmp = compare_hands(hands[j], hands[winning_hand]);
+      if (cmp > 0) {
+	winning_hand = j;
+	tie = 0;
+      } else if (cmp == 0) {
+	tie = 1;
+      }
+    }
+    if (tie) {
+      results[n_hands]++;
+    } else {
+      results[winning_hand]++;
+    }
+  }
+  for (size_t i = 0; i < n_hands; i++) {
+    printf("Hand %zu won %u / %u times (%.2f%%)\n",
+	   i, results[i], (unsigned int)num_trials,
+	   (double)(results[i] * 100 / num_trials));
+  }
+  if (results[n_hands] > 0) {
+    printf("And there were %u ties\n", results[n_hands]);
+  }
   // Clean up
   fclose(f);
-  /*
-   - Do each Monte Carlo trial (repeat num_trials times)
-        - Shuffle the deck of remaining cards
-	  (you wrote shuffle in Course 3)
-	- Assign unknown cards from the shuffled deck
-	  (you just wrote future_cards_from_deck)
-	- Use compare_hands (from Course 3) to
-	  figure out which hand won. Note that
-	  with potentially more than 2 hands,
-	  this is much like finding the max of
-	  an array, but using compare_hands
-	  instead of >.
-        - Increment the win count for the winning
-	  hand (or for the "ties" element of the array
-	  if there was a tie).
-   - After you do all your trials, you just need
-     to print your results, free any memory
-     you allocated, and close any open files.
-  */
-
+  free(results);
+  free_deck(remaining_deck);
+  for (size_t i = 0; i < n_hands; i++) {
+    free_deck(hands[i]);
+  }
+  free(hands);
+  free(fc.decks);
+  
   return EXIT_SUCCESS;
 }
